@@ -15,7 +15,7 @@
 Usage()
 {
 	echo "Usage:"
-	echo "Please input like $0 [PROCESS_NAME]"
+	echo "Please input like sudo $0 [PROCESS_NAME]"
 	echo "The [PROCESS_NAME] arg don't a need full name,but it must be unique for your needs"
 }
 
@@ -26,6 +26,7 @@ if [ $# -lt 1 ] ; then
 fi
 
 #directly kill all process by pid
+#it must need root permission 
 for process_name in $@ 
 do
 	kill -9 `ps -aux | grep $process_name | awk '{print $2}'`
