@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Input error,Please try again!\n");
 		Base32_to_Hex(example, example_result);
-		printf("the example is %s %s,the result is %s ,Good luch!!!\n",argv[0], example, example_result);
+		printf("the example is %s %s,the result is %s ,Good luck!!!\n",argv[0], example, example_result);
 		return 1;
 	}
 	Base32_to_Hex(argv[1], example_result);
