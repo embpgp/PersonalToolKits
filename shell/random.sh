@@ -5,7 +5,7 @@
 #
 #Description:generate random number by shell
 #
-#Arthor:rutk1t0r
+#Author:rutk1t0r
 #
 #Date:2016.12.31
 #
