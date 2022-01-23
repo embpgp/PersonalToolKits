@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# usage rm -inum "$inum1 $inum2" 
+
+if [ x"$1" != x"-inum" -o x"$2" = x"" ];then
+    ret=`rm $@`
+    exit $ret
+fi
+
+for i in $2 ; do
+    find ./ -inum $i | xargs rm -f
+done
