@@ -141,7 +141,7 @@ static int pfsocket(int ver)
 static void status_bar_update(void)
 {
 	if (total_packets % 10 == 0) {
-		fprintf(stderr, "%d\n", total_packets);
+		//fprintf(stderr, "%d\n", total_packets);
 		fflush(stderr);
 	}
 }
@@ -770,7 +770,23 @@ static void mmap_ring(int sock, struct ring *ring)
 static void bind_ring(int sock, struct ring *ring)
 {
 	int ret;
-	char *iface = "any";
+	ring->ll.sll_family = PF_PACKET;
+	ring->ll.sll_protocol = htons(ETH_P_ALL);
+	ring->ll.sll_ifindex = if_nametoindex("lo");
+	ring->ll.sll_hatype = 0;
+	ring->ll.sll_pkttype = 0;
+	ring->ll.sll_halen = 0;
+	
+	ret = bind(sock, (struct sockaddr *) &ring->ll, sizeof(ring->ll));
+	if (ret == -1) {
+		perror("bind");
+		exit(1);
+	}
+}
+
+static void bind_ring_bpf(int sock, struct ring *ring, char *iface, char *bpf_filter)
+{
+	int ret;
 	ring->ll.sll_family = PF_PACKET;
 	ring->ll.sll_protocol = htons(ETH_P_ALL);
 	ring->ll.sll_ifindex = if_nametoindex(iface);
@@ -784,7 +800,7 @@ static void bind_ring(int sock, struct ring *ring)
 			exit(1);
 		}
 	}
-	pair_setfilter(sock, "icmp");
+	pair_setfilter(sock, bpf_filter);
 }
 
 static void walk_ring(int sock, struct ring *ring)
@@ -873,7 +889,36 @@ static int test_tpacket(int version, int type)
 	return 0;
 }
 
-int main(void)
+static int start_tpacket(int version, int type, char *iface, char *bpf_filter){
+	int sock;
+	struct ring ring;
+
+	fprintf(stderr, "test: %s with %s ,iface: %s, bpf_filter: %s", tpacket_str[version],
+		type_str[type], iface, bpf_filter);
+	fflush(stderr);
+
+	if (version == TPACKET_V1 &&
+	    test_kernel_bit_width() != test_user_bit_width()) {
+		fprintf(stderr, "test: skip %s %s since user and kernel "
+			"space have different bit width\n",
+			tpacket_str[version], type_str[type]);
+		return 0;
+	}
+
+	sock = pfsocket(version);
+	memset(&ring, 0, sizeof(ring));
+	setup_ring(sock, &ring, version, type);
+	mmap_ring(sock, &ring);
+	bind_ring_bpf(sock, &ring, iface, bpf_filter);
+	walk_ring(sock, &ring);
+	unmap_ring(sock, &ring);
+	close(sock);
+
+	fprintf(stderr, "\n");
+	return 0;
+}
+
+int main(int argc, char *argv[])
 {
 	int ret = 0;
 	/*
@@ -883,8 +928,14 @@ int main(void)
 	ret |= test_tpacket(TPACKET_V2, PACKET_RX_RING);
 	ret |= test_tpacket(TPACKET_V2, PACKET_TX_RING);
 	*/
-	ret |= test_tpacket(TPACKET_V3, PACKET_RX_RING);
-
+	//ret |= test_tpacket(TPACKET_V3, PACKET_RX_RING);
+	char *iface = "eth0";
+	char *bpf_filter = "ip";
+	if (argc >= 3) {
+		iface = argv[1];
+		bpf_filter = argv[2];
+	}
+	ret = start_tpacket(TPACKET_V3, PACKET_RX_RING, iface, bpf_filter);
 	if (ret)
 		return 1;
 
