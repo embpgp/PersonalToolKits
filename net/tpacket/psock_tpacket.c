@@ -57,6 +57,9 @@
 #include <net/if.h>
 #include <inttypes.h>
 #include <poll.h>
+#include <netinet/tcp.h>
+#include <netinet/udp.h>
+#include <netinet/ip_icmp.h>
 
 #include "psock_lib.h"
 
@@ -143,6 +146,38 @@ static void status_bar_update(void)
 	}
 }
 
+void print_ip_header(const struct iphdr *ip_header) {
+    char src_ip[INET_ADDRSTRLEN];
+    char dst_ip[INET_ADDRSTRLEN];
+
+    inet_ntop(AF_INET, &(ip_header->saddr), src_ip, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &(ip_header->daddr), dst_ip, INET_ADDRSTRLEN);
+
+    printf("IP Header:\n");
+    printf("    Source IP: %s\n", src_ip);
+    printf("    Destination IP: %s\n", dst_ip);
+    printf("    Protocol: %d\n", ip_header->protocol);
+}
+
+void print_tcp_header(struct tcphdr *tcp_header) {
+    printf("TCP Header:\n");
+    printf("    Source Port: %d\n", ntohs(tcp_header->source));
+    printf("    Destination Port: %d\n", ntohs(tcp_header->dest));
+}
+
+void print_udp_header(struct udphdr *udp_header) {
+    printf("UDP Header:\n");
+    printf("    Source Port: %d\n", ntohs(udp_header->source));
+    printf("    Destination Port: %d\n", ntohs(udp_header->dest));
+}
+
+void print_icmp_header(const struct icmphdr *icmp_header) {
+    printf("ICMP Header:\n");
+    printf("    Type: %d\n", icmp_header->type);
+    printf("    Code: %d\n", icmp_header->code);
+}
+
+
 static void test_payload(void *pay, size_t len)
 {
 	struct ethhdr *eth = pay;
@@ -158,8 +193,28 @@ static void test_payload(void *pay, size_t len)
 			"type: 0x%x!\n", ntohs(eth->h_proto));
 		exit(1);
 	}
-	struct iphdr *ip = pay + sizeof(*eth);
-	printf("saddr: %s, daddr: %s\n", inet_ntoa(*(struct in_addr *) &ip->saddr),inet_ntoa(*(struct in_addr *) &ip->daddr));
+	struct iphdr *ip_header = pay + sizeof(*eth);
+	struct tcphdr *tcp_header;
+    struct udphdr *udp_header;
+    struct icmphdr *icmp_header;
+	print_ip_header(ip_header);
+	switch (ip_header->protocol) {
+            case IPPROTO_TCP:
+                tcp_header = (struct tcphdr *)(pay + sizeof(struct ether_header) + sizeof(struct iphdr));
+                print_tcp_header(tcp_header);
+                break;
+            case IPPROTO_UDP:
+                udp_header = (struct udphdr *)(pay + sizeof(struct ether_header) + sizeof(struct iphdr));
+                print_udp_header(udp_header);
+                break;
+            case IPPROTO_ICMP:
+                icmp_header = (struct icmphdr *)(pay + sizeof(struct ether_header) + sizeof(struct iphdr));
+                print_icmp_header(icmp_header);
+                break;
+            default:
+                printf("Unknown protocol: %d\n", ip_header->protocol);
+                break;
+        }
 }
 
 static void create_payload(void *pay, size_t *len)
