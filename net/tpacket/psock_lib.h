@@ -27,6 +27,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <pcap.h>
 
 #define DATA_LEN			100
 #define DATA_CHAR			'a'
@@ -58,6 +59,48 @@ static __maybe_unused void pair_udp_setfilter(int fd)
 		perror("setsockopt SO_ATTACH_FILTER");
 		exit(1);
 	}
+}
+
+
+
+void pair_setfilter(int fd, char *filter_exp)
+{
+	
+
+	//用于存储编译后的BPF程序
+	struct bpf_program fp;
+	pcap_t *handle = pcap_open_dead(DLT_EN10MB, 65535);
+	if(pcap_compile(handle, &fp, filter_exp, 0, PCAP_NETMASK_UNKNOWN)!=0)
+	{
+		printf("pcap_compile failed\n");
+		pcap_close(handle);
+		exit(1);
+	}
+
+	struct sock_filter* bpf_code = malloc(fp.bf_len * sizeof(struct sock_filter));
+	int i;
+	for (i = 0; i < fp.bf_len; ++i) {
+		bpf_code[i].code = fp.bf_insns[i].code;
+		bpf_code[i].jt = fp.bf_insns[i].jt;
+		bpf_code[i].jf = fp.bf_insns[i].jf;
+		bpf_code[i].k = fp.bf_insns[i].k;
+	}
+
+	struct sock_fprog bpf_prog;
+
+	bpf_prog.filter = bpf_code;
+	bpf_prog.len = fp.bf_len;  
+	if (setsockopt(fd, SOL_SOCKET, SO_ATTACH_FILTER, &bpf_prog,
+		       sizeof(bpf_prog))) {
+		printf("setsockopt SO_ATTACH_FILTER failed\n");
+		perror("setsockopt SO_ATTACH_FILTER");
+		free(bpf_code);
+        pcap_close(handle);
+		exit(1);
+	}
+	free(bpf_code);
+	pcap_close(handle);
+
 }
 
 static __maybe_unused void pair_udp_open(int fds[], uint16_t port)
@@ -125,3 +168,4 @@ static __maybe_unused void pair_udp_close(int fds[])
 }
 
 #endif /* PSOCK_LIB_H */
+

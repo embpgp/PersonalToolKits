@@ -583,7 +583,6 @@ static void walk_v3_rx(int sock, struct ring *ring)
     sleep_time.tv_nsec = (milliseconds % 1000) * 1000000; // 纳秒部分
 
 	int i;
-	static int cnt=0;
 	while (1/*total_packets < NUM_PACKETS * 2*/) {
 		
 		nanosleep(&sleep_time, NULL); // 睡眠指定的时间

@@ -3,7 +3,7 @@
 CC = $(CROSS_COMPILE)gcc
 CFLAGS = -Wall -O2 -g
 
-CFLAGS += -I../../../../usr/include/
+CFLAGS += -I../../../../usr/include/ -lpcap
 
 NET_PROGS = socket psock_fanout psock_tpacket
 
