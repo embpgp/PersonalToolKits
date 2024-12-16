@@ -36,6 +36,7 @@
  */
 
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -137,7 +138,7 @@ static int pfsocket(int ver)
 static void status_bar_update(void)
 {
 	if (total_packets % 10 == 0) {
-		fprintf(stderr, ".");
+		fprintf(stderr, "%d\n", total_packets);
 		fflush(stderr);
 	}
 }
@@ -157,6 +158,8 @@ static void test_payload(void *pay, size_t len)
 			"type: 0x%x!\n", ntohs(eth->h_proto));
 		exit(1);
 	}
+	struct iphdr *ip = pay + sizeof(*eth);
+	printf("saddr: %s, daddr: %s\n", inet_ntoa(*(struct in_addr *) &ip->saddr),inet_ntoa(*(struct in_addr *) &ip->daddr));
 }
 
 static void create_payload(void *pay, size_t *len)
@@ -565,7 +568,8 @@ static void walk_v3_rx(int sock, struct ring *ring)
 	bug_on(ring->type != PACKET_RX_RING);
 
 	pair_udp_open(udp_sock, PORT_BASE);
-	pair_udp_setfilter(sock);
+	//pair_udp_setfilter(sock);
+	
 
 	memset(&pfd, 0, sizeof(pfd));
 	pfd.fd = sock;
@@ -573,17 +577,26 @@ static void walk_v3_rx(int sock, struct ring *ring)
 	pfd.revents = 0;
 
 	pair_udp_send(udp_sock, NUM_PACKETS);
+	int milliseconds = 10; // 睡眠1000毫秒
+    struct timespec sleep_time;
+    sleep_time.tv_sec = milliseconds / 1000; // 秒部分
+    sleep_time.tv_nsec = (milliseconds % 1000) * 1000000; // 纳秒部分
 
-	while (total_packets < NUM_PACKETS * 2) {
-		pbd = (struct block_desc *) ring->rd[block_num].iov_base;
-
-		while ((BLOCK_STATUS(pbd) & TP_STATUS_USER) == 0)
-			poll(&pfd, 1, 1);
-
-		__v3_walk_block(pbd, block_num);
-		__v3_flush_block(pbd);
-
-		block_num = (block_num + 1) % ring->rd_num;
+	int i;
+	static int cnt=0;
+	while (1/*total_packets < NUM_PACKETS * 2*/) {
+		
+		nanosleep(&sleep_time, NULL); // 睡眠指定的时间
+		for(i=0;i<ring->rd_num;++i) {
+			pbd = (struct block_desc *) ring->rd[block_num].iov_base;
+			if ((BLOCK_STATUS(pbd) & TP_STATUS_USER) != 0){
+				__v3_walk_block(pbd, block_num);
+				__v3_flush_block(pbd);
+			}
+				//poll(&pfd, 1, 1);
+			block_num = (block_num + 1) % ring->rd_num;
+		}
+		
 	}
 
 	pair_udp_close(udp_sock);
@@ -627,7 +640,7 @@ static void __v3_fill(struct ring *ring, unsigned int blocks)
 	ring->req3.tp_sizeof_priv = 13;
 	ring->req3.tp_feature_req_word |= TP_FT_REQ_FILL_RXHASH;
 
-	ring->req3.tp_block_size = getpagesize() << 2;
+	ring->req3.tp_block_size = 65536;//getpagesize() << 2;
 	ring->req3.tp_frame_size = TPACKET_ALIGNMENT << 7;
 	ring->req3.tp_block_nr = blocks;
 
@@ -703,19 +716,21 @@ static void mmap_ring(int sock, struct ring *ring)
 static void bind_ring(int sock, struct ring *ring)
 {
 	int ret;
-
+	char *iface = "any";
 	ring->ll.sll_family = PF_PACKET;
 	ring->ll.sll_protocol = htons(ETH_P_ALL);
-	ring->ll.sll_ifindex = if_nametoindex("lo");
+	ring->ll.sll_ifindex = if_nametoindex(iface);
 	ring->ll.sll_hatype = 0;
 	ring->ll.sll_pkttype = 0;
 	ring->ll.sll_halen = 0;
-
-	ret = bind(sock, (struct sockaddr *) &ring->ll, sizeof(ring->ll));
-	if (ret == -1) {
-		perror("bind");
-		exit(1);
+	if (strcmp(iface, "any") != 0) {
+		ret = bind(sock, (struct sockaddr *) &ring->ll, sizeof(ring->ll));
+		if (ret == -1) {
+			perror("bind");
+			exit(1);
+		}
 	}
+	pair_setfilter(sock, "icmp");
 }
 
 static void walk_ring(int sock, struct ring *ring)
@@ -807,13 +822,13 @@ static int test_tpacket(int version, int type)
 int main(void)
 {
 	int ret = 0;
-
+	/*
 	ret |= test_tpacket(TPACKET_V1, PACKET_RX_RING);
 	ret |= test_tpacket(TPACKET_V1, PACKET_TX_RING);
 
 	ret |= test_tpacket(TPACKET_V2, PACKET_RX_RING);
 	ret |= test_tpacket(TPACKET_V2, PACKET_TX_RING);
-
+	*/
 	ret |= test_tpacket(TPACKET_V3, PACKET_RX_RING);
 
 	if (ret)
@@ -822,3 +837,5 @@ int main(void)
 	printf("OK. All tests passed\n");
 	return 0;
 }
+
+
