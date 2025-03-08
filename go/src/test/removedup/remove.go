@@ -15,15 +15,26 @@ func removeDuplicates(nums []int) int {
     return l
 }
 
+func removeDuplicates1(nums []int) int {
+    slow := 1
+    for fast:=1;fast<len(nums);fast++ {
+        if nums[fast]!=nums[fast-1] {
+		nums[slow] =  nums[fast]
+		slow++		
+	}
+    }
+    return slow
+}
 
-func removeDuplicates2(nums []int) int {
+
+func removeDuplicates2(nums []int,keep int) int {
     n := len(nums)
-    if n <= 2 {
+    if n <= keep {
         return n
     }
-    slow := 2
-    for fast := 2;fast<len(nums);fast++{
-        if nums[slow-2]!=nums[fast] {
+    slow := keep
+    for fast := keep;fast<len(nums);fast++{
+        if nums[slow-keep]!=nums[fast] {
             nums[slow] = nums[fast]
             slow++
         }

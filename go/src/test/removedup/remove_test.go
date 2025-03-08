@@ -14,11 +14,17 @@ func TestRemoveDup(t *testing.T) {
 
 }
 
+func TestRemoveDup1(t *testing.T) {
+	nums := []int{0,1,1,1,2,2,2,2,3}
+        fmt.Printf("before:%v\n", nums)
+	fmt.Printf("%v,%d\n", nums,removeDuplicates1(nums))
+
+}
 
 func TestRemoveDup2(t *testing.T) {
 	nums := []int{0,1,1,1,2,2,2,2,3}
         fmt.Printf("before:%v\n", nums)
-	fmt.Printf("%v,%d\n", nums,removeDuplicates2(nums))
+	fmt.Printf("%v,%d\n", nums,removeDuplicates2(nums, 1))
 
 }
 
