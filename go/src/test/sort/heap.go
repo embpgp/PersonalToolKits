@@ -1,6 +1,9 @@
 package sort
 
-import "fmt"
+import (
+	"container/heap"
+	"fmt"
+)
 
 func heapSort(a []int) {
 	n := len(a)
@@ -96,4 +99,46 @@ func (h *streamMinHeap) Add(num int) {
 
 func (h *streamMinHeap) Print() {
 	fmt.Printf("%v\n", h.data)
+}
+
+type IntHeadp []int
+
+func (h IntHeadp) Len() int {
+	return len(h)
+}
+func (h IntHeadp) Less(i, j int) bool {
+	return h[i] < h[j]
+}
+func (h IntHeadp) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+}
+
+func (h *IntHeadp) Push(x interface{}) {
+	*h = append(*h, x.(int))
+}
+func (h *IntHeadp) Pop() interface{} {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[:n-1]
+	return x
+}
+
+func getTopK(a []int, k int) []int {
+	h := &IntHeadp{}
+
+	heap.Init(h)
+	for _, num := range a {
+		if h.Len() < k {
+			heap.Push(h, num)
+		} else if num > (*h)[0] {
+			heap.Pop(h)
+			heap.Push(h, num)
+		}
+	}
+	res := make([]int, k)
+	for i := k - 1; i >= 0; i-- {
+		res[i] = h.Pop().(int)
+	}
+	return res
 }

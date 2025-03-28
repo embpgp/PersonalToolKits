@@ -28,3 +28,10 @@ func Test_streamMinHeap_Add(t *testing.T) {
 	}
 
 }
+
+func Test_getTopK(t *testing.T) {
+	a := []int{1, 3, 2, 5, 4, 6, 7, 8, 9, 10}
+	k := 4
+	got := getTopK(a, k)
+	fmt.Printf("%+v\n", got)
+}

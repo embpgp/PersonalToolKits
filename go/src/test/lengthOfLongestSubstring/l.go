@@ -27,18 +27,18 @@ func lengthOfLongestSubstringv2(s string) int {
 		return n
 	}
 	m := make(map[byte]struct{})
-	max, l, r := 0, 0, -1
+	max, l, r := 0, 0, 0
 	for r+1 < n {
-		if _, ok := m[s[r+1]]; ok {
+		if _, ok := m[s[r]]; ok {
 			delete(m, s[l])
 			l++
 		} else {
-			m[s[r+1]] = struct{}{}
+			m[s[r]] = struct{}{}
 			r++
 		}
 
-		if r-l+1 > max {
-			max = r - l + 1
+		if r-l > max {
+			max = r - l
 		}
 	}
 
