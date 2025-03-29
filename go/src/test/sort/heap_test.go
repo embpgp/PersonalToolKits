@@ -35,3 +35,10 @@ func Test_getTopK(t *testing.T) {
 	got := getTopK(a, k)
 	fmt.Printf("%+v\n", got)
 }
+
+func Test_topKFrequent(t *testing.T) {
+	nums := []int{4, 1, -1, 2, -1, 2, 3}
+	k := 2
+	got := topKFrequent(nums, k)
+	fmt.Printf("%v\n", got)
+}

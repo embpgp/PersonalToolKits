@@ -142,3 +142,70 @@ func getTopK(a []int, k int) []int {
 	}
 	return res
 }
+
+type freqK struct {
+	Value int
+	Cnt   int
+}
+
+func topKFrequent(nums []int, k int) []int {
+	n := len(nums)
+	if k >= n {
+		return nums
+	}
+	m := make(map[int]int)
+	for i := 0; i < n; i++ {
+		m[nums[i]]++
+	}
+	kCnt := 0
+	var cntNums []freqK
+	for value, count := range m {
+		if kCnt < k {
+			cntNums = append(cntNums, freqK{Value: value, Cnt: count})
+			up(cntNums, len(cntNums)-1)
+			kCnt++
+		} else { //第0个元素属于最小的
+			if count > cntNums[0].Cnt {
+				cntNums[0] = freqK{Value: value, Cnt: count}
+				down(cntNums, k, 0)
+			}
+		}
+	}
+	fmt.Printf("cntNums:%+v\n", cntNums)
+	var ans []int
+	for _, v := range cntNums {
+		ans = append(ans, v.Value)
+	}
+	return ans
+
+}
+
+// 调整i节点
+func down(nums []freqK, n, i int) {
+	left := 2*i + 1
+	right := 2*i + 2
+	small := i
+	if left < n && nums[left].Cnt < nums[small].Cnt {
+		small = left
+	}
+	if right < n && nums[right].Cnt < nums[small].Cnt {
+		small = right
+	}
+	if small != i {
+		nums[small], nums[i] = nums[i], nums[small]
+		down(nums, n, small)
+	}
+}
+
+func up(nums []freqK, i int) {
+	for {
+		p := (i - 1) / 2
+		if p >= 0 && nums[i].Cnt < nums[p].Cnt {
+			nums[i], nums[p] = nums[p], nums[i]
+			i = p
+		} else {
+			break
+		}
+
+	}
+}
