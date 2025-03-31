@@ -41,7 +41,7 @@ func pipeline(client *redis.Client) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("cmders len:%d\n", len(cmders))
+	//fmt.Printf("cmders len:%d\n", len(cmders))
 	for _, cmd := range cmders {
 		if cmd.Err() != nil {
 			return cmd.Err()
