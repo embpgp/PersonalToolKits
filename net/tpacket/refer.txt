@@ -1,0 +1,2 @@
+https://github.com/vieites4/rawsockets/blob/master/docs/snippets/packet_mmap.c
+https://github.com/zheng-da/high-speed-data-transfer/blob/master/mmap-sender.c#L260

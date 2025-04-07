@@ -9,11 +9,11 @@ func heapSort(a []int) {
 	n := len(a)
 	//先构建一个最大堆，从最后一个元素开始
 	for i := n/2 - 1; i >= 0; i-- {
-		heapify(a, n, i)
+		heapifyIter(a, n, i)
 	}
 	for i := n - 1; i > 0; i-- {
 		a[i], a[0] = a[0], a[i]
-		heapify(a, i, 0) //从0开始调整
+		heapifyIter(a, i, 0) //从0开始调整
 	}
 }
 
@@ -31,6 +31,28 @@ func heapify(a []int, n, i int) {
 	if i != largest {
 		a[i], a[largest] = a[largest], a[i]
 		heapify(a, n, largest)
+	}
+
+}
+
+// heapify 调整以i为根的子树为最大堆,O(1)空间
+func heapifyIter(a []int, n, i int) {
+	parent := i
+	for {
+		child := 2*parent + 1
+		if child >= n {
+			break
+		}
+		if child+1 < n && a[child+1] > a[child] {
+			child++
+		}
+		if a[parent] > a[child] {
+			return
+		}
+		//swap
+		a[parent], a[child] = a[child], a[parent]
+		parent = child
+
 	}
 
 }

@@ -26,3 +26,36 @@ func removeKdigits(num string, k int) string {
 	}
 	return s
 }
+
+func removeKdigits1(num string, k int) string {
+	//这个题转换为，当n[k-1]>n[k]的时候，需要移除掉n[k-1]
+	n := len(num)
+	if k >= n {
+		return "0"
+	}
+	var stack []byte
+	for i := 0; i < n; i++ {
+		for k > 0 && len(stack) > 0 && stack[len(stack)-1] > num[i] {
+			//remove
+			stack = stack[:len(stack)-1]
+			k--
+		}
+		fmt.Printf("%s,k:%d\n", stack, k)
+		stack = append(stack, num[i])
+
+	}
+	//若k>0
+	stack = stack[:len(stack)-k]
+	if len(stack) == 0 {
+		return "0"
+	}
+	for i, v := range stack {
+		if v == '0' {
+			continue
+		} else {
+			//直接返回所有的
+			return string(stack[i:])
+		}
+	}
+	return "0"
+}

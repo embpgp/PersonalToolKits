@@ -10,6 +10,7 @@ func Test_heapSort(t *testing.T) {
 	fmt.Printf("%d\n", findTopKbyHeap(target, 4))
 	fmt.Printf("%+v\n", target)
 	heapSort(target)
+	//sort.Slice(target, func(i, j int) bool { return target[i] < target[j] })
 	fmt.Printf("%+v", target)
 
 }

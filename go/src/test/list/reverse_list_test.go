@@ -19,8 +19,42 @@ func Test_reverseList(t *testing.T) {
 	node5.next = node6
 	head := &node{value: 0}
 	head.next = node1
-	got := reverseList(head)
+	got := reverseList2(head)
 	for next := got; next != nil; next = next.next {
 		fmt.Printf("%d ", next.value)
 	}
+}
+
+func reverseList1(head *node) *node {
+	if head == nil || head.next == nil {
+		return head
+	}
+	var pre *node
+	curr := head
+	for curr != nil {
+		next := curr.next
+		curr.next = pre
+		pre = curr
+		curr = next
+	}
+	return pre
+}
+
+// 头插法
+func reverseList2(head *node) *node {
+
+	if head == nil || head.next == nil {
+		return head
+	}
+	dummy := &node{}
+	p := head
+	for p != nil {
+		tmp := p
+		p = p.next
+
+		tmp.next = dummy.next
+		dummy.next = tmp
+	}
+	return dummy.next
+
 }

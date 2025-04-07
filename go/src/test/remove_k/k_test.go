@@ -6,7 +6,7 @@ import (
 )
 
 func Test_removeKdigits(t *testing.T) {
-	s := "1234567890"
-	got := removeKdigits(s, 9)
+	s := "0001234567890"
+	got := removeKdigits1(s, 9)
 	fmt.Printf("%s", got)
 }
