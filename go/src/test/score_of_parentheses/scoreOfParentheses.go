@@ -56,7 +56,7 @@ func calculateBracketScore(s string) string {
 
 			if v == '(' {
 				curr := 1
-				for len(stack) > 0 && stack[len(stack)-1] != '(' && stack[len(stack)-1] != ')' {
+				if len(stack) > 0 && stack[len(stack)-1] != '(' && stack[len(stack)-1] != ')' {
 					//如果还有数字
 					digital := stack[len(stack)-1]
 					stack = stack[:len(stack)-1]
@@ -72,14 +72,14 @@ func calculateBracketScore(s string) string {
 					stack = stack[:len(stack)-1]
 					if pre == '(' {
 						new = v * 2
-					} else {
+					} else { //无法闭合，把pre跟其他的都push回去，例如)2(
 						stack = append(stack, pre)
 						stack = append(stack, v)
 						stack = append(stack, c)
 						fmt.Printf("-----333----stack:%v\n", stack)
 						continue
 					}
-				} else { //非闭合，直接追加数据
+				} else { //非闭合，直接追加数据,原有的数据也Push回去
 					stack = append(stack, v)
 					stack = append(stack, c)
 					DbgPrintf("-----222----stack:%v\n", stack)
@@ -88,7 +88,7 @@ func calculateBracketScore(s string) string {
 				}
 				DbgPrintf("new:%d\n", new)
 				//stack = append(stack, rune(new))
-
+				//这里循环处理并合并
 				for len(stack) > 0 && stack[len(stack)-1] != '(' && stack[len(stack)-1] != ')' {
 					//如果还有数字持续合并
 					digital := stack[len(stack)-1]
