@@ -6,7 +6,7 @@ import (
 )
 
 func Test_lengthOfLongestSubstring(t *testing.T) {
-	s := "pwwkew"
+	s := "dddabcd444jkdes"
 	got := lengthOfLongestSubstring(s)
 	fmt.Printf("%d\n", got)
 	got = lengthOfLongestSubstringv2(s)

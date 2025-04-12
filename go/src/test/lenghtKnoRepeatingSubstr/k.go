@@ -24,3 +24,29 @@ func numKLenSubstrNoRepeats(s string, k int) int {
 	}
 	return ans
 }
+
+// 求长度为K的无重复子串的个数
+func f(s string, k int) int {
+
+	if k > 26 || k > len(s) {
+		return 0
+	}
+	ans := 0
+	left, right := 0, 0
+	freq := make([]byte, 26)
+	for right < len(s) {
+		freq[s[right]-'a']++
+		for freq[s[right]-'a'] > 1 {
+			//left右边走
+			freq[s[left]-'a']--
+			left++
+		}
+		if right-left+1 == k {
+			ans++
+			freq[s[left]-'a']--
+			left++
+		}
+		right++
+	}
+	return ans
+}

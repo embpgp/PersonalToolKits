@@ -46,7 +46,7 @@ func heapifyIter(a []int, n, i int) {
 		if child+1 < n && a[child+1] > a[child] {
 			child++
 		}
-		if a[parent] > a[child] {
+		if a[parent] >= a[child] {
 			return
 		}
 		//swap

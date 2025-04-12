@@ -25,6 +25,7 @@ func mergeRange(arr [][]int) [][]int {
 		if !isSwaped {
 			break
 		}
+
 	}
 	fmt.Printf("sort:%+v\n", arr)
 	var merged [][]int

@@ -2,14 +2,16 @@ package k
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
 func TestStrstr(t *testing.T) {
 	s := "sadbutsad"
-	p := "sad"
+	p := "dbu"
 
 	got := Strstr(s, p)
-	fmt.Printf("idx:%d", got)
+	idx := strings.Index(s, p)
+	fmt.Printf("idx:%d,%d", got, idx)
 
 }

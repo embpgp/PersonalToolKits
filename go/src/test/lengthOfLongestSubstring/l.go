@@ -28,7 +28,7 @@ func lengthOfLongestSubstringv2(s string) int {
 	}
 	m := make(map[byte]struct{})
 	max, l, r := 0, 0, 0
-	for r+1 < n {
+	for r < n {
 		if _, ok := m[s[r]]; ok {
 			delete(m, s[l])
 			l++
