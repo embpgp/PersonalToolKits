@@ -36,7 +36,7 @@ func DbgPrintf(format string, a ...any) (n int, err error) {
 	return fmt.Printf(format, a...)
 }
 
-// 计算平衡子串的分数
+// 兼容非闭合括号
 func calculateBracketScore(s string) string {
 	stack := []rune{}
 	for _, c := range s {
@@ -49,7 +49,7 @@ func calculateBracketScore(s string) string {
 				DbgPrintf("111\n")
 				continue
 			}
-
+			//pop
 			v := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 			DbgPrintf("vvvvv:%v, stack:%v\n", v, stack)
@@ -73,15 +73,12 @@ func calculateBracketScore(s string) string {
 					if pre == '(' {
 						new = v * 2
 					} else { //无法闭合，把pre跟其他的都push回去，例如)2(
-						stack = append(stack, pre)
-						stack = append(stack, v)
-						stack = append(stack, c)
+						stack = append(stack, pre, v, c)
 						fmt.Printf("-----333----stack:%v\n", stack)
 						continue
 					}
 				} else { //非闭合，直接追加数据,原有的数据也Push回去
-					stack = append(stack, v)
-					stack = append(stack, c)
+					stack = append(stack, v, c)
 					DbgPrintf("-----222----stack:%v\n", stack)
 					continue
 
@@ -95,7 +92,7 @@ func calculateBracketScore(s string) string {
 					stack = stack[:len(stack)-1]
 					new = digital + new
 				}
-				stack = append(stack, rune(new))
+				stack = append(stack, new)
 			}
 		}
 
